@@ -42,7 +42,23 @@ class EvaluateExpressionTest {
 		assertEquals(0, eval.returnResult());
 	}
 	
-	
+	@Test
+	void TestTrueAndFalseOrTrueOrFalseEvaluation() {
+		eval.addExpression("true");
+		eval.addExpression("and");
+		eval.addExpression("false"); 
+		eval.addExpression("or");
+		eval.addExpression("true");
+		eval.addExpression("or");
+		eval.addExpression("false");
+		
+		eval.evaluateExpressions();
+	      eval.arraysToString();
+
+		
+		assertEquals(0, eval.returnResult());
+				
+	}
 	
 	@Test
 	/**
@@ -149,7 +165,7 @@ class EvaluateExpressionTest {
 	 * 
 	 * true and true and true or false true and true and (true or false) true and
 	 * true and true true and true true
-	 * 
+	 * CONT
 	 * 
 	 */
 	@Test
@@ -167,7 +183,24 @@ class EvaluateExpressionTest {
         assertEquals(0, eval.returnResult());
 
 	}
+	
+	
+	@Test
+	void FalseXORTrueAndTrueNandTrue() {
+		eval.addExpression("false");
+		eval.addExpression("xor");
+		eval.addExpression("true");
+		eval.addExpression("and");
+		eval.addExpression("true");
+		eval.addExpression("nand");
+		eval.addExpression("true");
+		// Results in true or true and false.
+        eval.evaluateExpressions();
+        eval.arraysToString();
+        assertEquals(0, eval.returnResult());
 
+	}
+	
 	/**
 	 * There is no way to evaluate this other than false
 	 */
