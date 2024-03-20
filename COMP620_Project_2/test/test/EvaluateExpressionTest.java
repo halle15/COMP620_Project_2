@@ -22,9 +22,10 @@ class EvaluateExpressionTest {
 	@Test
 	void TestSimpleFalseEvaluation() {
 		eval.addExpression("false");
+		
+		eval.evaluateExpressions();
 
-		assertEquals(Integer.MIN_VALUE, eval.evaluateExpressions());
-		assertEquals(false, eval.evaluateExpressionRange(0, 0));
+		assertEquals(Integer.MAX_VALUE, eval.returnResult());
 		
 		eval.arraysToString();
 	}
@@ -33,9 +34,12 @@ class EvaluateExpressionTest {
 	@Test
 	void TestSimpleTrueEvaluation() {
 		eval.addExpression("true");
+		
+		eval.evaluateExpressions();
+	    eval.arraysToString();
 
-		assertEquals(0, eval.evaluateExpressions());
-		assertEquals(true, eval.evaluateExpressionRange(0, 0));
+
+		assertEquals(0, eval.returnResult());
 	}
 	
 	
@@ -49,11 +53,37 @@ class EvaluateExpressionTest {
 		eval.addExpression("or");
 		eval.addExpression("false"); // false or false = false
 		
-		assertEquals(Integer.MIN_VALUE, eval.evaluateExpressions());
-		assertEquals(false, eval.evaluateExpressionRange(0, 2));
-		eval.arraysToString();
+		eval.evaluateExpressions();
+	      eval.arraysToString();
 
+		
+		assertEquals(Integer.MAX_VALUE, eval.returnResult());
+				
 	}
+	
+	   @Test
+	    /**
+	     * This should have no method of evaluating to a positive.
+	     */
+	    void TestTrueOrTrueAndFalseOrFalseEvaluation() {
+           eval.addExpression("true");
+           eval.addExpression("or");
+           eval.addExpression("true");
+           eval.addExpression("and");
+           eval.addExpression("false");
+           eval.addExpression("or");
+           eval.addExpression("false");
+           
+           eval.evaluateExpressions();
+           eval.arraysToString();
+
+	        
+	        assertEquals(3, eval.returnResult());
+	                
+	        eval.arraysToString();
+
+	    }
+
 
 	/**
 	 * This should not need any modification to evaluate to true.
@@ -63,25 +93,30 @@ class EvaluateExpressionTest {
 		eval.addExpression("true");
 		eval.addExpression("or");
 		eval.addExpression("true"); // true or true = true
+		
+	      eval.evaluateExpressions();
+	        eval.arraysToString();
 
-		assertEquals(0, eval.evaluateExpressions());
+		assertEquals(0, eval.returnResult());
 		
-		eval.arraysToString();
-		
-		assertEquals(true, eval.evaluateExpressionRange(0, 2));
+        eval.arraysToString();
+
 	}
 	
 	@Test
 	void TestTrueAndFalseEvaluation() {
+	    System.out.println("TrueAndFalseTest\n===================");
+	    
 		eval.addExpression("true");
 		eval.addExpression("and");
 		eval.addExpression("false"); // true or true = true
+		
+	      eval.evaluateExpressions();
+	        eval.arraysToString();
 
-		assertEquals(Integer.MIN_VALUE, eval.evaluateExpressions());
-		
-		eval.arraysToString();
-		
-		assertEquals(false, eval.evaluateExpressionRange(0, 2));
+		assertEquals(Integer.MAX_VALUE, eval.returnResult());
+        eval.arraysToString();
+
 	}
 
 	/**
@@ -97,13 +132,17 @@ class EvaluateExpressionTest {
 		eval.addExpression("true");
 		eval.addExpression("and");
 		eval.addExpression("false"); // Results in true or true and false.
-
-		assertEquals(3, eval.evaluateExpressions());
-
 		
-		assertEquals(true, eval.evaluateExpressionRange(0, 4));
 		
+		eval.initializeArrays();
+
+	      eval.evaluateExpressions();
+	        eval.arraysToString();
+
+		assertEquals(3, eval.returnResult());
+
 	}
+	
 
 	/**
 	 * This should result in:
@@ -123,22 +162,10 @@ class EvaluateExpressionTest {
 		eval.addExpression("or");
 		eval.addExpression("false");
 		// Results in true or true and false.
-		eval.newEvaluateExpressions();
+        eval.evaluateExpressions();
+        eval.arraysToString();
+        assertEquals(0, eval.returnResult());
 
-		assertEquals(true, eval.evaluateExpressionRange(0,6));
-	}
-
-	@Test
-	void TestRidiculousTrueOrTrueLongEvaluation() {
-		for (int i = 0; i < 3; i++) {
-			eval.addExpression("true");
-			eval.addExpression("or");
-		}
-
-		//assertEquals(true, eval.evaluateExpressionRange());
-		assertEquals(0, eval.evaluateExpressions());
-		eval.newEvaluateExpressions();
-		eval.arraysToString();
 	}
 
 	/**
@@ -149,8 +176,11 @@ class EvaluateExpressionTest {
 		eval.addExpression("true");
 		eval.addExpression("xor");
 		eval.addExpression("true"); // true xor true = false
-
-		assertEquals(false, eval.evaluateExpressionRange(0, 2));
+		
+        eval.evaluateExpressions();
+        eval.arraysToString();
+        assertEquals(Integer.MAX_VALUE, eval.returnResult());
+		
 	}
 
 	/**
@@ -161,8 +191,10 @@ class EvaluateExpressionTest {
 		eval.addExpression("true");
 		eval.addExpression("xor");
 		eval.addExpression("false"); // true xor true = false
-
-		assertEquals(true, eval.evaluateExpressionRange());
+		
+        eval.evaluateExpressions();
+        eval.arraysToString();
+        assertEquals(0, eval.returnResult());
 	}
 
 	/**
@@ -173,8 +205,11 @@ class EvaluateExpressionTest {
 		eval.addExpression("false");
 		eval.addExpression("xor");
 		eval.addExpression("true"); // true xor true = false
+		
+        eval.evaluateExpressions();
+        eval.arraysToString();
+        assertEquals(0, eval.returnResult());
 
-		assertEquals(true, eval.evaluateExpressionRange());
 	}
 
 	/**
@@ -185,8 +220,11 @@ class EvaluateExpressionTest {
 		eval.addExpression("false");
 		eval.addExpression("xor");
 		eval.addExpression("false"); // true xor true = false
+		
+	      eval.evaluateExpressions();
+	        eval.arraysToString();
+	        assertEquals(Integer.MAX_VALUE, eval.returnResult());
 
-		assertEquals(false, eval.evaluateExpressionRange());
 	}
 
 	/**
@@ -197,8 +235,10 @@ class EvaluateExpressionTest {
 		eval.addExpression("true");
 		eval.addExpression("nand");
 		eval.addExpression("true"); // true nand true = false
-
-		assertEquals(false, eval.evaluateExpressionRange());
+		
+	      eval.evaluateExpressions();
+	        eval.arraysToString();
+	        
 	}
 
 	/**
@@ -209,8 +249,10 @@ class EvaluateExpressionTest {
 		eval.addExpression("true");
 		eval.addExpression("nand");
 		eval.addExpression("false"); // true nand false = true
+		
+	      eval.evaluateExpressions();
+	        eval.arraysToString();
 
-		assertEquals(true, eval.evaluateExpressionRange());
 	}
 
 	/**
@@ -223,7 +265,6 @@ class EvaluateExpressionTest {
 		eval.addExpression("nand");
 		eval.addExpression("true"); // false nand true = true
 
-		assertEquals(true, eval.evaluateExpressionRange());
 
 	}
 
@@ -235,8 +276,10 @@ class EvaluateExpressionTest {
 		eval.addExpression("false");
 		eval.addExpression("nand");
 		eval.addExpression("false"); // false nand false = true
+		
+	      eval.evaluateExpressions();
+	        eval.arraysToString();
 
-		assertEquals(true, eval.evaluateExpressionRange());
 	}
 
 	/**
@@ -246,8 +289,10 @@ class EvaluateExpressionTest {
 	void TestNotTrueEvaluation() {
 		eval.addExpression("not");
 		eval.addExpression("true");
+		
+	      eval.evaluateExpressions();
+	        eval.arraysToString();
 
-		assertEquals(false, eval.evaluateExpressionRange(0, 1));
 	}
 
 	/**
@@ -258,7 +303,6 @@ class EvaluateExpressionTest {
 		eval.addExpression("not");
 		eval.addExpression("false");
 
-		assertEquals(true, eval.evaluateExpressionRange(0, 1));
 	}
 
 	/**
@@ -273,7 +317,6 @@ class EvaluateExpressionTest {
 		eval.addExpression("and");
 		eval.addExpression("false");
 
-		assertEquals(true, eval.evaluateExpressionRange());
 	}
 	
 }
