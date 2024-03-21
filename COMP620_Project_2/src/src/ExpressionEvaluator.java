@@ -115,7 +115,8 @@ public class ExpressionEvaluator {
 	public boolean LogicalNAND(boolean input1, boolean input2) {
 		return !(input1 && input2);
 	}
-
+	
+	
 	public int solve(String input1, String input2, String input3) {
 
 		boolean answer;
@@ -131,13 +132,15 @@ public class ExpressionEvaluator {
 
 			return answer ? 0 : Integer.MAX_VALUE;
 		} else if (input2.equals("nand")) {
-			answer = LogicalNAND(Boolean.getBoolean(input1), Boolean.getBoolean(input1));
+			answer = LogicalNAND(Boolean.parseBoolean(input1), Boolean.parseBoolean(input3));
 
 			return answer ? 0 : Integer.MAX_VALUE;
 		} else {
 			throw new IllegalArgumentException("We don't know how to do " + input1 + input2 + input3 + " at   yet :(");
 		}
 	}
+	
+	
 
 	public int evaluateExpressions() {
 
@@ -278,49 +281,184 @@ public class ExpressionEvaluator {
 
 		else {
 			if (end - start == 2) {
+			   
 				return solve(expressions.get(start), expressions.get(start + 1), expressions.get(end));
 			}
 
-			if (expressions.get(end) == "true" && expressions.get(end - 1) == "or") {
-				return 0; // A or true always evaluates to true at no cost;
-							// does not matter what A evaluates to. do not put parentheses anywhere
-			}
 			/*
-			 * if start = x, end = y, we are tasked with choosing whichever returns true for
-			 * the cheapest. if we utilize the leftmost side, or x-2, y, this indicates that
-			 * we will just be reading left to right, and we will do nothing.
+			 * 
+			 * in this case, we are at a given x,y, or start, end.
+			 * 
+			 * when we are at our start, end in the map, we must consider two choices:
+			 * 
+			 * we can do nothing, and place no parentheses at a cost of nothing and have the expression eval from left to right
+			 * 
+			 * we can place parentheses around (x, y+2) for a cost of minimum(cost[x][y+2] + (end - start), 0)
+			 * 
+			 * (e.g. if we are given true and true or false nand true, when we are evaluating 7, 3, we must choose the min between
 			 * 
 			 * 
-			 * 
-			 * we can do nothing, which costs whatever the cost of x-2,y is.
-			 * 
-			 * or, we can parenthesize the rest of the expressions from x to y+2.
-			 * 
-			 * example for true or true and false:
-			 * 
-			 * we are considering from x = 5 to y = 1, or starting from 1 and ending at 5.
-			 * 
-			 * we can consider to not parenthesize anything, or call it "fake parentheses"
-			 * around 1-3 for free. check if it results in true: it does, as start, end-2 =
-			 * 0, which is true for free. but we check it with AND FALSE, and it results in
-			 * inf.
-			 * 
-			 * now, if we put parentheses around start 3 and end 5, we know this will result
-			 * in false as we have already calculated it. but, we now check this against
-			 * TRUE OR (expression), and it results in true.
-			 * 
-			 * so, for a given start and end, we must check for the minimum between
-			 * 
-			 * start, end-2, eval of expression at end-1, end
-			 * 
-			 * or
-			 * 
-			 * start, expression at start+1, evaluation(start+2-end)
+			 *       min(cost[7-2][3], 0)
+			 *       min(cost[7][3+2] + (end - start), 0)
+			 *       
+			 *       ===============================================================================
+			 *       
+			 *       MAYBE RATHER THAN THE BRUTE FORCE COST DIFFERENCE, AS IT SEEMS THERE ARE TWO OPTIONS. SOMETIMES WE WANT TO FORCE A FALSE RESULT
+			 *       IN ORDER TO END UP WITH A TRUE RESULT IN EXPRESSIONS
+			 *       
+			 *       WE JUST ANAYLZE TO SEE (EXAMPLE TRUE OR TRUE AND FALSE)
+			 *       
+			 *       IF 1-3, IN ANSWER TO 1-3, OPERATOR 4, EXPRESSION 5, (TRUE OR TRUE) AND FALSE, WERE TO BE TRUTHY, WOULD THIS WORK?
+			 *           THIS CHOICE DOES NOT CARRY A COST AS THERE DO NOT ACTUALLY NEED TO BE PARENTHESES THERE.
+			 *           
+			 *       IF 3-5, IN EXPRESSION 1, OPERATOR 2, ANSWER TO 3-5, TRUE OR (TRUE AND FALSE) WERE TO BE TRUTHY, WOULD THIS WORK DESPITE THE ADDED COST?
+			 *       
+			 *       1-3 AND FALSE : THIS WILL NOT BE WORTH CHECKING EVEN IF 1-3 IS TRUE! IF WE ACTUALLY DID TAKE THIS, WE READ FROM LEFT TO RIGHT,
+             *           COSTING NOTHING.
+			 *       
+			 *       TRUE OR 3-5 : IN THIS CASE, IT DOESN'T EVEN MATTER IF 3-5 IS TRUE! WE DON'T REALLY HAVE TO EVALUATE IT! WE AUTOMATICALLY ASSIGN IT THE
+			 *       COST OF (END-START)+2, AS WE DO NOT NEED TO EVALUATE 3-5 TO TRUE, WE ONLY NEED TO PARENTHESIZE.
+			 *       
+			 *       SO IN THIS CASE IT WILL BE A COST OF (5-1)+2, OR 3, AS WE ARE PARENTHESIZING THREE OBJECTS.
+			 *       
+			 *       IF WE EVALUATED 1-7, IT WOULD BE (7-1)+2, OR 5, PARENTHESIZING 5, ETC.
+			 *       
+			 *       
+			 *       I SHOULD WALK THROUGH EACH CASES GIVEN AN OPERATOR, ESPECIALLY SO WITH NAND AND XOR.
+			 *       
+			 *       
+			 *       
+			 *       
 			 * 
 			 */
+			
+			
+			/*
+			 * Left to right (cheap case)
+			 */
+			
+			boolean cheapCaseSubExpressionResult = (costsMap[start][end - 2] < Integer.MAX_VALUE);
+			String endOperation = expressions.get(end - 1);
+			boolean endExpression = Boolean.valueOf(expressions.get(end));
+			
+			int previousCost = costsMap[start][end - 2];
+			
+			if(previousCost > Integer.MAX_VALUE/2) {
+                previousCost = 0;
+            }
+			
+			int cheapCaseScore = 0 + previousCost;
+			
+			
+			
+		    switch (endOperation) {
+	        case "and":
+	            
+	            // Handle 'and' operation
+	            boolean result = cheapCaseSubExpressionResult && endExpression;
+	            
+	            if(!result) {
+	                cheapCaseScore = Integer.MAX_VALUE;
+	            }
 
-			//System.out.println(start + " WITH " + end);
+	            break;
+	        case "or":
+	            // Handle 'or' operation
+	            result = cheapCaseSubExpressionResult || endExpression;
+	            
+	            if(!result) {
+	                    cheapCaseScore = Integer.MAX_VALUE;
+	            }
 
+	            break; 
+	        case "xor":
+	            // Handle 'xor' operation
+	            result = cheapCaseSubExpressionResult ^ endExpression;
+	            
+	           if(!result) {
+                       cheapCaseScore = Integer.MAX_VALUE;
+               }
+
+	            break;
+	        case "nand":	            
+	            // Handle 'nand' operation
+	            result = !(cheapCaseSubExpressionResult && endExpression);
+	            
+	            if(!result) {
+	                    cheapCaseScore = Integer.MAX_VALUE;
+	            }
+	            
+
+	            break;
+	        // Add more cases for each known operator
+	        default:
+	            // Handle unknown operator
+	            throw new IllegalArgumentException("Unknown operation: " + endOperation);
+	    }
+		    
+		    
+	          String startOperation = expressions.get(start + 1);
+	          boolean rightSideSubExpressionResult = (costsMap[start + 2][end] < Integer.MAX_VALUE);
+	          boolean firstExpression = Boolean.valueOf(expressions.get(start));
+	          
+	          previousCost = costsMap[start + 2][end];
+	          
+	          if(previousCost > Integer.MAX_VALUE/2) {
+	              previousCost = 0; // maybe this will work?
+	          }
+	          
+	          int expensiveCaseScore = ((end - start) - 1) + previousCost;
+	          
+	          System.out.println("spensive" + expensiveCaseScore);
+		    
+		    switch (startOperation) {
+            case "and":
+                
+                // Handle 'and' operation
+                boolean result = firstExpression && rightSideSubExpressionResult;
+                
+                if(!result) {
+                    expensiveCaseScore = Integer.MAX_VALUE;
+                }
+
+                break;
+            case "or":
+                // Handle 'or' operation
+                result = firstExpression || rightSideSubExpressionResult;
+                
+                if(!result) {
+                    expensiveCaseScore = Integer.MAX_VALUE;
+                }
+
+                break; 
+            case "xor":
+                // Handle 'xor' operation
+                result = firstExpression ^ rightSideSubExpressionResult;
+                
+               if(!result) {
+                   expensiveCaseScore = Integer.MAX_VALUE;
+               }
+
+                break;
+            case "nand":                
+                // Handle 'nand' operation
+                result = !(firstExpression && rightSideSubExpressionResult);
+                
+                if(!result) {
+                    expensiveCaseScore = Integer.MAX_VALUE;
+                }
+                
+
+                break;
+            // Add more cases for each known operator
+            default:
+                // Handle unknown operator
+                throw new IllegalArgumentException("Unknown operation: " + endOperation);
+        }
+			   
+			// current faulty approach
+			
+			/*
 			boolean leftSideSubExpressionResult = (costsMap[start][end - 2] < Integer.MAX_VALUE);
 			boolean rightSideSubExpressionResult = (costsMap[start + 2][end] < Integer.MAX_VALUE);
 
@@ -337,7 +475,7 @@ public class ExpressionEvaluator {
 					Boolean.toString(rightSideSubExpressionResult));
 
 			rightSideSolution = Math.max(rightSideSolution += (end - start - 1), 0);
-
+*/
 			/*System.out.println("\n\n\nEVALUATING:\n" + leftSideSubExpressionResult + " " + endOperation + " "
 					+ endExpression + "\nAGAINST\n" + firstExpression + " " + startOperation + " "
 					+ rightSideSubExpressionResult);
@@ -347,7 +485,7 @@ public class ExpressionEvaluator {
 			*/
 			
 			
-			return Math.min(leftSideSolution, rightSideSolution);
+			return Math.min(cheapCaseScore, expensiveCaseScore); // we must assure it does not go below 0!
 
 		}
 

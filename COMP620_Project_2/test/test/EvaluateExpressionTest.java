@@ -1,14 +1,15 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import src.ExpressionEvaluator;
+
+/**
+ * 
+ * These test cases were manually calculated on paper/excel to ensure accuracy.
+ * 
+ */
 
 class EvaluateExpressionTest {
 
@@ -78,27 +79,46 @@ class EvaluateExpressionTest {
 	}
 	
 	   @Test
-	    /**
-	     * This should have no method of evaluating to a positive.
-	     */
-	    void TestTrueOrTrueAndFalseOrFalseEvaluation() {
+	    void TestTrueOrTrueAndFalseAndFalseEvaluation() {
            eval.addExpression("true");
            eval.addExpression("or");
            eval.addExpression("true");
            eval.addExpression("and");
            eval.addExpression("false");
-           eval.addExpression("or");
+           eval.addExpression("and");
            eval.addExpression("false");
            
            eval.evaluateExpressions();
            eval.arraysToString();
 
 	        
-	        assertEquals(3, eval.returnResult());
+	        assertEquals(5, eval.returnResult());
 	                
 	        eval.arraysToString();
 
 	    }
+	   
+       @Test
+       void TestTrueOrTrueAndFalseAndFalseAndFalseEvaluation() {
+          eval.addExpression("true");
+          eval.addExpression("or");
+          eval.addExpression("true");
+          eval.addExpression("and");
+          eval.addExpression("false");
+          eval.addExpression("and");
+          eval.addExpression("false");
+          eval.addExpression("and");
+          eval.addExpression("false");
+          
+          eval.evaluateExpressions();
+          eval.arraysToString();
+
+           
+           assertEquals(7, eval.returnResult());
+                   
+           eval.arraysToString();
+
+       }
 
 
 	/**
@@ -197,7 +217,7 @@ class EvaluateExpressionTest {
 		// Results in true or true and false.
         eval.evaluateExpressions();
         eval.arraysToString();
-        assertEquals(0, eval.returnResult());
+        assertEquals(Integer.MAX_VALUE, eval.returnResult());
 
 	}
 	
